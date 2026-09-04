@@ -1,9 +1,11 @@
+local explorer = require("olive.explorer")
+
 local M = {}
 
-function M.say_hello()
+M.say_hello = function()
 	print("Hello World!")
 end
-function M.setup(opts)
+M.setup = function(opts)
 	opts = opts or {}
 
 	local keymap = opts.keymap or "<leader>hw"
@@ -12,6 +14,13 @@ function M.setup(opts)
 		desc = "Say hello from olive.nvim",
 		silent = true,
 	})
+
+	vim.keymap.set("n", "<leader>he", M.toggle_explorer, {
+		desc = "Toggle olive explorer",
+		silent = true,
+	})
 end
+
+M.toggle_explorer = explorer.toggle_explorer
 
 return M
