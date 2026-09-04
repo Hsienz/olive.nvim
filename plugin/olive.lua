@@ -1,1 +1,5 @@
-vim.api.nvim_create_user_command("HelloWorld", require("olive").say_hello, {})
+local olive = require("olive")
+vim.api.nvim_create_user_command("HelloWorld", olive.say_hello, {})
+vim.api.nvim_create_user_command("OliveClose", olive.close_explorer, {})
+vim.api.nvim_create_user_command("OliveOpen", olive.open_explorer, {})
+vim.api.nvim_create_user_command("OliveToggle", olive.toggle_explorer, {})

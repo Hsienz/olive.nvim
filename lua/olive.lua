@@ -22,5 +22,7 @@ M.setup = function(opts)
 end
 
 M.toggle_explorer = explorer.toggle_explorer
+M.open_explorer = explorer.open_explorer
+M.close_explorer = explorer.close_explorer
 
 return M

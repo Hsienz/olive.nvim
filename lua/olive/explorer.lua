@@ -13,6 +13,39 @@ vim.api.nvim_create_autocmd("VimLeavePre", {
 	end,
 })
 
+local function list_cwd()
+	local entries = {}
+	local fs = vim.uv.fs_scandir(vim.fn.getcwd())
+	if fs then
+		while true do
+			local name, ftype = vim.uv.fs_scandir_next(fs)
+			if not name then
+				break
+			end
+			table.insert(entries, { name = name, type = ftype })
+		end
+	end
+
+	table.sort(entries, function(a, b)
+		if a.type ~= b.type then
+			return a.type == "directory"
+		end
+		return a.name:lower() < b.name:lower()
+	end)
+
+	return entries
+end
+
+local function render(target_buf)
+	local lines = {}
+	for _, entry in ipairs(list_cwd()) do
+		table.insert(lines, entry.name .. (entry.type == "directory" and "/" or ""))
+	end
+
+	vim.api.nvim_buf_set_lines(target_buf, 0, -1, false, lines)
+	vim.bo[target_buf].modified = false
+end
+
 M.open_explorer = function()
 	local existing = vim.fn.bufnr(BUF_NAME)
 	if existing ~= -1 then
@@ -20,7 +53,20 @@ M.open_explorer = function()
 	else
 		buf = vim.api.nvim_create_buf(true, true)
 		vim.api.nvim_buf_set_name(buf, BUF_NAME)
+		vim.bo[buf].buftype = "acwrite"
+
+		vim.api.nvim_create_autocmd("BufWriteCmd", {
+			buffer = buf,
+			callback = function()
+				-- TODO: diff buffer lines against list_cwd() and apply
+				-- the resulting create/rename/delete operations to disk.
+				vim.bo[buf].modified = false
+			end,
+		})
+		vim.keymap.set("n", "q", M.close_explorer, { buffer = buf, silent = true, nowait = true })
 	end
+
+	render(buf)
 
 	local width = 50
 
